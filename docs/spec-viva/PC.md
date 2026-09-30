@@ -6,7 +6,7 @@ Permitir que una persona cree una cuenta en FlowSync, entre con ella, mantenga s
 
 ### Requirement: Registro de cuenta por API
 
-El sistema SHALL crear una cuenta nueva a partir de nombre completo (opcional), email, contraseña y confirmación de contraseña, y SHALL devolver en la misma respuesta los datos públicos de la cuenta y un token de acceso ya utilizable, sin necesidad de hacer login después.
+El sistema SHALL crear una cuenta nueva a partir de nombre completo, email, contraseña y confirmación de contraseña, y SHALL devolver en la misma respuesta los datos públicos de la cuenta y un token de acceso ya utilizable, sin necesidad de hacer login después. El nombre completo puede valer `null`, pero la clave debe estar presente en la petición.
 
 #### Scenario: Registro correcto
 
@@ -59,13 +59,18 @@ El sistema SHALL calcular y devolver unas iniciales en mayúsculas para cada cue
 
 #### Scenario: Nombre de dos o más palabras
 
-- **WHEN** la cuenta tiene un nombre completo con al menos dos palabras separadas por espacio (p. ej. "Ada Lovelace")
+- **WHEN** la cuenta tiene un nombre completo con al menos dos palabras separadas por un único espacio (p. ej. "Ada Lovelace")
 - **THEN** las iniciales son la primera letra de la primera y de la segunda palabra ("AL")
+
+#### Scenario: Palabras separadas por varios espacios
+
+- **WHEN** el nombre completo tiene dos palabras separadas por más de un espacio seguido (p. ej. "Ada  Lovelace")
+- **THEN** las iniciales son los dos primeros caracteres de la primera palabra ("AD")
 
 #### Scenario: Nombre de una sola palabra
 
 - **WHEN** la cuenta tiene un nombre completo de una sola palabra (p. ej. "Ada")
-- **THEN** las iniciales son sus dos primeros caracteres ("AD")
+- **THEN** las iniciales son sus dos primeros caracteres ("AD"), o uno solo si el nombre tiene un único carácter
 
 #### Scenario: Sin nombre
 
@@ -115,10 +120,10 @@ El sistema SHALL proteger los endpoints de cuenta exigiendo un token de acceso v
 - **WHEN** se usa un token emitido hace cualquier cantidad de tiempo y que no ha sido revocado
 - **THEN** el sistema lo sigue aceptando
 
-#### Scenario: Respuestas siempre en JSON
+#### Scenario: Respuestas de cuenta en JSON
 
-- **WHEN** cualquier petición a la API produce una respuesta, incluidos los errores
-- **THEN** el cuerpo se devuelve en JSON, independientemente de lo que pida el cliente
+- **WHEN** un endpoint de registro, login, perfil o logout responde con éxito o con un error de validación, credenciales o autorización
+- **THEN** el cuerpo se devuelve en JSON aunque el cliente no lo pida
 
 ### Requirement: Consulta del perfil por API
 
@@ -170,7 +175,7 @@ El sistema SHALL ofrecer una pantalla de registro accesible solo sin sesión, co
 #### Scenario: Errores de validación por campo
 
 - **WHEN** el servidor rechaza el registro por validación
-- **THEN** cada campo afectado muestra su mensaje en castellano debajo del input (p. ej. "Ese email ya está registrado. Inicia sesión en su lugar.", "Introduce una dirección de email válida.", "la contraseña debe tener al menos 8 caracteres.", "la contraseña no puede superar los 32 caracteres.", "Falta rellenar el email."), y los datos introducidos se conservan
+- **THEN** cada campo afectado muestra su mensaje en castellano debajo del input (p. ej. "Ese email ya está registrado. Inicia sesión en su lugar.", "Introduce una dirección de email válida.", "la contraseña debe tener al menos 8 caracteres.", "la contraseña no puede superar los 32 caracteres.", "Falta rellenar el email.", "la confirmación de la contraseña debe tener al menos 8 caracteres."), y los datos introducidos se conservan; un error de una regla sin mensaje específico se muestra como "Revisa <campo>." (p. ej. "Revisa el email.")
 
 #### Scenario: Error no asociable a un campo
 
@@ -209,7 +214,12 @@ El sistema SHALL ofrecer una pantalla de login accesible solo sin sesión, con l
 #### Scenario: Motivo de una sesión perdida
 
 - **WHEN** la persona llega al login porque no se pudo restaurar una sesión anterior
-- **THEN** el login muestra en el aviso superior el motivo (p. ej. "Tu sesión ha caducado. Vuelve a iniciar sesión."), hasta que un nuevo intento de login lo sustituye por su propio resultado
+- **THEN** el login muestra en el aviso superior el motivo (p. ej. "Tu sesión ha caducado. Vuelve a iniciar sesión.")
+
+#### Scenario: El motivo de la sesión perdida persiste ante errores de campo
+
+- **WHEN** se muestra el motivo de una sesión perdida y la persona intenta entrar
+- **THEN** el aviso sigue visible mientras se envía y también si el servidor solo devuelve errores de campo; lo sustituye un error general (credenciales incorrectas, servidor inaccesible) y desaparece con un login correcto
 
 ### Requirement: Sesión persistente en el navegador
 
@@ -266,7 +276,7 @@ El sistema SHALL mostrar a la persona con sesión sus datos de cuenta y la opci�
 #### Scenario: Cerrar sesión
 
 - **WHEN** la persona pulsa "Cerrar sesión"
-- **THEN** el botón muestra "Cerrando sesión…", la sesión se borra del navegador, la persona es llevada al login sin ningún aviso de error y se pide al servidor que revoque el token
+- **THEN** la sesión se borra del navegador de inmediato, la persona es llevada al login sin ningún aviso de error y, sin esperar respuesta, se pide al servidor que revoque el token
 
 #### Scenario: Cerrar sesión con el servidor caído
 
