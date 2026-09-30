@@ -1,35 +1,84 @@
 # Prompts
 
-Aquí van **todos los prompts que lanzaste** para hacer el ejercicio, en el orden en que los
-lanzaste, con el modelo y la herramienta de cada uno.
+---
 
-Esto no es papeleo. Lo que se revisa es **cómo pediste las cosas**, no solo lo que salió: un
-resultado flojo con un prompt bueno y un resultado flojo con un prompt vago necesitan feedback
-distinto, y sin este archivo no se distinguen.
+## Prompt 1 — Exploración
 
-## Cómo rellenarlo
+**Modelo:** Opus 5.5 · Claude Pro
+**Herramienta:** Claude Code v2.1.280
 
-- Un apartado `## Prompt N` por cada prompt.
-- **Pega el prompt tal cual lo lanzaste**, dentro del bloque de código, aunque ocupe diez líneas
-  y aunque tenga faltas. No lo reescribas para que quede bien: el que arreglaste mentalmente
-  después no es el que lanzaste.
-- Incluye también los que **no funcionaron**. Suelen ser los más útiles de leer.
-- `Modelo` y `Herramienta` en todos. Si cambiaste de una a otra a mitad, se nota aquí.
+```
+Necesito entender qué tiene FlowSync hoy en el vertical de cuentas y acceso. Explorá el código de ambas capas sin tocar nada:
+- Backend: rutas, controladores, validadores, middlewares, modelo de usuario
+- Frontend: pantallas de acceso, estado de sesión, protección de rutas
 
-Borra el ejemplo de abajo cuando escribas el primero.
+Contame qué encontrás. No escribas archivos, no propongas cambios, solo leé y resumí.
+```
+
+**Qué salió:** Exploró rutas, controladores, validadores, modelo, transformer, frontend (páginas, auth-provider, routes). Devolvió un resumen de las capabilities existentes: signup, login, logout, perfil, sesión persistente, protección de rutas. Identificó el modelo de datos (users + access_tokens) y las reglas de validación.
 
 ---
 
-## Prompt 1
+## Prompt 2 (no funcionó)
 
-**Modelo:** Opus 1M xHigh
-**Herramienta:** Claude Code
+**Modelo:** Opus 5.5 · Claude Pro
+**Herramienta:** Claude Code v2.1.280
 
 ```
-Este es el ejemplo. Bórralo.
+Con lo que exploraste, escribí la spec viva del vertical de cuentas y acceso en docs/spec-viva/PC.md con este formato exacto:
 
-El prompt va aquí dentro, entero y con sus saltos de línea,
-para que se sepa dónde empieza y dónde acaba.
+## Purpose
+Una o dos frases de para qué existe esta capability.
+
+## Requirements
+
+### Requirement: [nombre descriptivo]
+El sistema SHALL [comportamiento observable].
+
+#### Scenario: [nombre del caso]
+- **WHEN** [qué pasa]
+- **THEN** [qué hace el sistema]
+
+Reglas:
+1. NO uses ADDED, MODIFIED ni REMOVED — esto NO es un delta, es la verdad actual
+2. SOLO comportamiento observable desde fuera — ni nombres de clase, ni nombres de archivo, ni rutas de código. API = petición y respuesta. Pantalla = lo que una persona ve y puede hacer.
+3. NO toques el código, solo leelo
+4. En castellano, salvo las mayúsculas RFC (SHALL, WHEN, THEN)
+5. Solo el vertical de cuentas y acceso (registro, login, sesión, perfil) — nada de tareas ni otra cosa
 ```
 
-**Qué salió:** (opcional, una línea) funcionó a la primera / tuve que insistir / me inventó una ruta que no existe.
+**Qué salió:** Escribió la spec (274 líneas, bien hecha), pero no paró ahí: corrió la skill de commit, commiteó, abrió un PR contra mi fork, y lanzó el adversarial-reviewer. Todo en un solo turno sin dejarme revisar nada. Tuve que cerrar el PR, resetear la rama y volver a empezar. Lección: faltaba acotar explícitamente que NO hiciera nada más que escribir el archivo.
+
+---
+
+## Prompt 3
+
+**Modelo:** Opus 5.5 · Claude Pro
+**Herramienta:** Claude Code v2.1.285
+
+```
+Con lo que exploraste, escribí la spec viva del vertical de cuentas y acceso en docs/spec-viva/PC.md con este formato exacto:
+
+## Purpose
+Una o dos frases de para qué existe esta capability.
+
+## Requirements
+
+### Requirement: [nombre descriptivo]
+El sistema SHALL [comportamiento observable].
+
+#### Scenario: [nombre del caso]
+- **WHEN** [qué pasa]
+- **THEN** [qué hace el sistema]
+
+Reglas:
+1. NO uses ADDED, MODIFIED ni REMOVED — esto NO es un delta, es la verdad actual
+2. SOLO comportamiento observable desde fuera — ni nombres de clase, ni nombres de archivo, ni rutas de código. API = petición y respuesta. Pantalla = lo que una persona ve y puede hacer.
+3. NO toques el código, solo leelo
+4. En castellano, salvo las mayúsculas RFC (SHALL, WHEN, THEN)
+5. Solo el vertical de cuentas y acceso (registro, login, sesión, perfil) — nada de tareas ni otra cosa
+
+IMPORTANTE: TU ÚNICO TRABAJO ES ESCRIBIR EL ARCHIVO docs/spec-viva/PC.md Y PARAR. NO hagas commit. NO abras PR. NO corras skills. NO corras el adversarial reviewer. SOLO escribí el archivo y mostrámelo.
+```
+
+**Qué salió:** Escribió la spec con 13 requirements y ~35 scenarios cubriendo API y frontend. Esta vez sí paró sin commitear ni abrir PR. Señaló 4 detalles que encontró en el código (fullName required como clave, mensajes en minúscula, logout parcial, iniciales sin nombre).
